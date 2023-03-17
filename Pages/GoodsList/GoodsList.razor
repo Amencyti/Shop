@@ -1,0 +1,134 @@
+@page "/GoodsList"
+@inject NavigationManager UriHelper
+@inject CartState CartState
+
+<button @onclick="UploadGoodsFromJSON">upload from Json</button>
+<input type="text" placeholder="test" @bind="filterText" @bind:event="oninput">
+@if (allItems == null)
+{
+
+}
+
+else
+{
+    <div style="overflow:auto;height:600px">
+        <table class="table">
+            <thead style="position: sticky;top: 0;background: white;">
+                <tr>
+                    <th>N.</th>
+                    <th>Article</th>
+                    <th>Name</th>
+                    <td>Count</td>
+                    <th>Price</th>
+                    <th>Max. discount</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 1; i < allItems.Count; i++)
+                {
+                    TechItem item = allItems[i - 1];
+                    if (!IsVisible(item))
+                    {
+                        continue;
+                    }
+
+                    <tr>
+                        <td>@i</td>
+                        <td>@item.Article</td>
+                        <td>@item.Name</td>
+                        <td>@item.Count</td>
+                        <td>@item.Cost</td>
+                        <td>@GetMaxDiscount(item)</td>
+                        <td>
+                            <button @onclick="@(()=>CartState.AddItem(item))">Add to cart</button>
+                            <Button @onclick="@(()=>ShowTechItemDialog(item))">More information</Button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<TemplatedDialog Show=@showItem>
+    <Shop.Pages.GoodsItem.GoodItem techItem="@currentItem" 
+    AddItem="CartState.AddItem"
+    OnCancel="CloseTechItemDialog"/>
+</TemplatedDialog>
+
+@*i don`t knew why but without parametr Cart table don`t update after adding new item*@
+<Shop.Pages.Cart.CartTable Cart="@CartState"/>
+
+@code {
+    private List<TechItem> allItems;
+    private bool showItem;
+    private string filterText;
+    private TechItem currentItem;
+    [CascadingParameter]
+    public App StoreApp { get; set; }
+
+    protected override void OnInitialized()
+    {
+        StoreApp.SetLayout(typeof(Shop.Shared.MainLayout));
+        CartState.OnAddToCart += OnAddToCart;
+        CartState.OnDeleteFromCart += OnDeleteFromCart;
+        using (StoreDBContext db = new StoreDBContext())
+        {
+
+            allItems = db.GoodsQueries.GetAllTechItems();
+            SortItemsAnArticle();
+
+        }
+    }
+
+    private void ShowTechItemDialog(TechItem item)
+    {
+        showItem = true;
+        currentItem = item;
+    }
+    private void CloseTechItemDialog()
+    {
+        showItem = false;
+    }
+
+    public bool IsVisible(TechItem forecast)
+    {
+        if (string.IsNullOrEmpty(filterText))
+            return true;
+        if (forecast.Article.Contains(filterText, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (forecast.Name.Contains(filterText, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private void OnAddToCart(object sender, EventArgs e)
+    {
+        allItems.Remove((TechItem)sender);  
+    }
+    private void OnDeleteFromCart(object sender, EventArgs e)
+    {
+        allItems.Add((TechItem)sender); 
+        SortItemsAnArticle();
+        StateHasChanged();
+    }
+
+
+    private void UploadGoodsFromJSON()
+    {
+        LoadItemsFromJson test = new LoadItemsFromJson();
+        test.LoadFromFile();
+    }
+
+    private void SortItemsAnArticle()
+    {
+        allItems.Sort((x,y) => x.Article.CompareTo(y.Article));
+    }
+
+    private string GetMaxDiscount(TechItem item)
+    {
+        return Math.Max(0, Math.Round(item.Cost - item.SelfCost, 2)).ToString();
+    }
+
+}

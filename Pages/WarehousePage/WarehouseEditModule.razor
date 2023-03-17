@@ -1,0 +1,41 @@
+@inject StoreDBContext DbContext
+
+@if (IsOpen)
+{
+    <div class="card">
+        <div class="card-body">
+            <label>Warehouse name</label>
+            <input type="text" class="form-control" @bind-value="Model.Name" />
+            <button type="submit" class="btn btn-primary" @onclick="SaveChanges">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="CancelChanges">Cancel</button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Warehouse Model { get; set; }
+    private List<Organization> Organizations { get; set; }
+    private List<Warehouse> Warehouses { get; set; }
+    [Parameter]
+    public bool IsOpen { get; set; }
+    [Parameter]
+    public EventCallback<Warehouse> OnSave { get; set; }
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Organizations = await DbContext.StructureQueries.AllOrganizationFromDB();
+    }
+    private async Task SaveChanges()
+    {
+        await OnSave.InvokeAsync(Model);
+    }
+
+    private void CancelChanges()
+    {
+        OnCancel.InvokeAsync();
+    }
+
+}

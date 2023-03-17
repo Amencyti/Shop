@@ -1,0 +1,86 @@
+@page "/employees"
+@inject StoreDBContext DbContext
+
+<h1>Employees</h1>
+<button class="btn btn-primary" @onclick="@(() => EditItem(NewEmployee))">Add</button>
+@if (EditingEmployee == NewEmployee)
+{
+    <EmployeeEditModule Model="@EditingEmployee" IsOpen="openEditor" OnSave="Save"
+    OnCancel="CancelEditing" />
+}
+<h1></h1>
+@if (Employees == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    @foreach (var Employee in Employees)
+    {
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">@Employee.Name</h5>
+                <h5 class="card-title">@Employee.SurName</h5>
+                <Button class="btn btn-primary" @onclick="@(() => EditItem(Employee))">Edit</Button>
+                <button class="btn btn-primary" @onclick="@(() => Delete(Employee))">Delete</button>
+                @if (EditingEmployee == Employee)
+                {
+                    <EmployeeEditModule Model="@EditingEmployee" IsOpen="openEditor" OnSave="Save"
+                        OnCancel="CancelEditing" />
+                }
+            </div>
+        </div>
+    }
+}
+
+
+@code {
+    private List<Employee> Employees { get; set; }
+    private Employee NewEmployee { get; set; }
+    private Employee EditingEmployee;
+    private bool openEditor = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        Employees = await DbContext.StructureQueries.AllEmployeesFromDB();
+        NewEmployee = new Employee();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Save(Employee Employee)
+    {
+        DbContext.Update(Employee);
+        await DbContext.SaveChangesAsync();
+        EditingEmployee = null;
+        NewEmployee = new Employee(); 
+        Employees = await DbContext.StructureQueries.AllEmployeesFromDB();
+    }
+
+    private void EditItem(Employee Employee)
+    {
+        openEditor = false;
+        openEditor = !openEditor;
+        EditingEmployee = Employee;
+    }
+
+    private void Add()
+    {
+        openEditor = false;
+        openEditor = !openEditor;
+        EditingEmployee = NewEmployee;
+    }
+
+    private async Task Delete(Employee Employee)
+    {
+        DbContext.Employees.Remove(Employee);
+        await DbContext.SaveChangesAsync();
+        Employees.Remove(Employee);
+    }
+
+    private void CancelEditing()
+    {
+        EditingEmployee = null;
+    }
+
+}

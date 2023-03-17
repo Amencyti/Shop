@@ -1,0 +1,56 @@
+@page "/login"
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavigationManager
+@inject StoreDBContext StoreDBContext
+
+<div class="edit-form-container">
+	<EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+		<div>
+			<label for="login">Username:</label>
+			<InputText id="login" @bind-Value="@model.Login" />
+		</div>
+
+		<div>
+			<label for="password">Password:</label>
+			<InputText id="password" type="password" @bind-Value="@model.Password" />
+		</div>
+
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+
+		<button type="submit">Login</button>
+		<button onclick="Register">Register</button>
+
+	</EditForm>
+</div>
+
+@code {
+	
+	[CascadingParameter]
+	public App StoreApp { get; set; }
+
+	private LoginController model = new LoginController();
+
+	protected override void OnInitialized()
+	{
+		StoreApp.SetLayout(typeof(EmptyLayout));
+	}
+
+	private void HandleValidSubmit()
+	{
+		if (model.CheckLoginPassword() == true)
+		{
+			NavigationManager.NavigateTo("/goodslist");
+		}
+		else
+		{
+			System.Console.WriteLine("error");
+		}
+	}
+
+	private async Task Register()
+	{
+		await model.SaveLoginPassword();
+	}
+
+}

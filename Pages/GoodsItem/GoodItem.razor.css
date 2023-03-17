@@ -1,0 +1,73 @@
+/*#left, #right {display: inline-block; *display: inline; zoom: 1; vertical-align: top; font-size: 12px;}*/
+.dialog-title {
+    background-color: #F2F2F2;
+    border-radius: 5px 5px 0 0;
+    padding: 10px;
+    text-align: center;
+    font-size: 24px;
+  }
+  
+  .dialog-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    font-size: 16px;
+  }
+  
+  .dialog-body #left {
+    width: 40%;
+  }
+  
+  .dialog-body #right {
+    width: 60%;
+  }
+  
+  .dialog-body #left img {
+    max-width: 100%;
+    border-radius: 5px;
+  }
+  
+  .dialog-body #right label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .dialog-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #F2F2F2;
+    border-radius: 0 0 5px 5px;
+  }
+  
+  .dialog-buttons button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  .dialog-buttons .btn-secondary {
+    background-color: #EAEAEA;
+    color: #000;
+  }
+  
+  .dialog-buttons .btn-success {
+    background-color: #008CBA;
+    color: #FFF;
+  }
+
+
+
+.close-button {
+    background-color: transparent;
+    border: none;
+    color: #999;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.close-button:hover {
+    color: #333;
+}

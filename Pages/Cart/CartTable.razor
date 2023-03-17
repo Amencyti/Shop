@@ -1,0 +1,38 @@
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Article</th>
+                <th>Name</th>
+                <th>Cost</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in cart._techitems)
+            {
+                <tr>
+                    <td>@product.Article</td>
+                    <td>@product.Name</td>
+                    <td>@product.Cost</td>
+                    <td><button class="btn btn-danger" @onclick="@(() => cart.RemoveItem(product))">Remove</button></td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2"><strong>Total: @cart.GetTotalSumm()</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <button @onclick=@cart.SellWithCash>Sell with cash</button>
+
+
+@code
+{
+
+    [Parameter] 
+    public CartState cart{ get; set; }
+
+}

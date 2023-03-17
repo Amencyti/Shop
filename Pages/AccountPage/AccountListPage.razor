@@ -1,0 +1,84 @@
+@page "/Accounts"
+@inject StoreDBContext DbContext
+
+<h1>Accounts</h1>
+<button class="btn btn-primary" @onclick="@(() => EditItem(NewAccount))">Add</button>
+@if (EditingAccount == NewAccount)
+{
+    <AccountEditModule Model="@EditingAccount" IsOpen="openEditor" OnSave="Save"
+    OnCancel="CancelEditing" />
+}
+<h1></h1>
+@if (Accounts == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    @foreach (var Account in Accounts)
+    {
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">@Account.Name</h5>
+                <Button class="btn btn-primary" @onclick="@(() => EditItem(Account))">Edit</Button>
+                <button class="btn btn-primary" @onclick="@(() => Delete(Account))">Delete</button>
+                @if (EditingAccount == Account)
+                {
+                    <AccountEditModule Model="@EditingAccount" IsOpen="openEditor" OnSave="Save"
+                        OnCancel="CancelEditing" />
+                }
+            </div>
+        </div>
+    }
+}
+
+
+@code {
+    private List<Account> Accounts { get; set; }
+    private Account NewAccount { get; set; }
+    private Account EditingAccount;
+    private bool openEditor = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Accounts = await DbContext.StructureQueries.AllAccountsFromDB();
+        NewAccount = new Account();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Save(Account account)
+    {
+        DbContext.Update(account);
+        await DbContext.SaveChangesAsync();
+        EditingAccount = null;
+        NewAccount = new Account();
+        Accounts = await DbContext.StructureQueries.AllAccountsFromDB();
+    }
+
+    private void EditItem(Account account)
+    {
+        openEditor = false;
+        openEditor = !openEditor;
+        EditingAccount = account;
+    }
+
+    private void Add()
+    {
+        openEditor = false;
+        openEditor = !openEditor;
+        EditingAccount = NewAccount;
+    }
+
+    private async Task Delete(Account account)
+    {
+        DbContext.Accounts.Remove(account);
+        await DbContext.SaveChangesAsync();
+        Accounts.Remove(account);
+    }
+
+    private void CancelEditing()
+    {
+        EditingAccount = null;
+    }
+
+}

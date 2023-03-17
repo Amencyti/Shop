@@ -1,0 +1,84 @@
+@page "/stores"
+@inject StoreDBContext DbContext
+
+<h1>Stores</h1>
+<button class="btn btn-primary" @onclick="@(() => EditItem(NewStore))">Add</button>
+@if (EditingStore == NewStore)
+{
+    <StoreEditModule Model="@EditingStore" IsOpen="openEditor" OnSave="Save"
+    OnCancel="CancelEditing" />
+}
+<h1></h1>
+@if (Stores == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    @foreach (var store in Stores)
+    {
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">@store.Name</h5>
+                <Button class="btn btn-primary" @onclick="@(() => EditItem(store))">Edit</Button>
+                <button class="btn btn-primary" @onclick="@(() => Delete(store))">Delete</button>
+                @if (EditingStore == store)
+                {
+                    <StoreEditModule Model="@EditingStore" IsOpen="openEditor" OnSave="Save"
+                        OnCancel="CancelEditing" />
+                }
+            </div>
+        </div>
+    }
+}
+
+
+@code {
+    private List<Store> Stores { get; set; }
+    private Store NewStore { get; set; }
+    private Store EditingStore;
+    private bool openEditor = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Stores = await DbContext.StructureQueries.AllStoresFromDB();
+        NewStore = new Store();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Save(Store store)
+    {
+        DbContext.Update(store);
+        await DbContext.SaveChangesAsync();
+        EditingStore = null;
+        NewStore = new Store();
+        Stores = await DbContext.StructureQueries.AllStoresFromDB();
+    }
+
+    private void EditItem(Store store)
+    {
+        openEditor = false;
+        openEditor = !openEditor;
+        EditingStore = store;
+    }
+
+    private void Add()
+    {
+        openEditor = false;
+        openEditor = !openEditor;
+        EditingStore = NewStore;
+    }
+
+    private async Task Delete(Store store)
+    {
+        DbContext.Stores.Remove(store);
+        await DbContext.SaveChangesAsync();
+        Stores.Remove(store);
+    }
+
+    private void CancelEditing()
+    {
+        EditingStore = null;
+    }
+
+}

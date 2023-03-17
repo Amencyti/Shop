@@ -1,0 +1,84 @@
+@page "/warehouses"
+@inject StoreDBContext DbContext
+
+<h1>Warehouses</h1>
+<button class="btn btn-primary" @onclick="@(() => EditItem(NewWarehouse))">Add</button>
+@if (EditingWarehouse == NewWarehouse)
+{
+    <WarehouseEditModule Model="@EditingWarehouse" IsOpen="openEditor" OnSave="Save"
+    OnCancel="CancelEditing" />
+}
+<h1></h1>
+@if (Warehouses == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    @foreach (var warehouse in Warehouses)
+    {
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">@warehouse.Name</h5>
+                <Button class="btn btn-primary" @onclick="@(() => EditItem(warehouse))">Edit</Button>
+                <button class="btn btn-primary" @onclick="@(() => Delete(warehouse))">Delete</button>
+                @if (EditingWarehouse == warehouse)
+                {
+                    <WarehouseEditModule Model="@EditingWarehouse" IsOpen="openEditor" OnSave="Save"
+                        OnCancel="CancelEditing" />
+                }
+            </div>
+        </div>
+    }
+}
+
+
+@code {
+    private List<Warehouse> Warehouses { get; set; }
+    private Warehouse NewWarehouse { get; set; }
+    private Warehouse EditingWarehouse;
+    private bool openEditor = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Warehouses = await DbContext.StructureQueries.AllWarehousesFromDB();
+        NewWarehouse = new Warehouse();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Save(Warehouse warehouse)
+    {
+        DbContext.Update(warehouse);
+        await DbContext.SaveChangesAsync();
+        EditingWarehouse = null;
+        NewWarehouse = new Warehouse();
+        Warehouses = await DbContext.StructureQueries.AllWarehousesFromDB();
+    }
+
+    private void EditItem(Warehouse warehouse)
+    {
+        openEditor = false;
+        openEditor = !openEditor;
+        EditingWarehouse = warehouse;
+    }
+
+    private void Add()
+    {
+        openEditor = false;
+        openEditor = !openEditor;
+        EditingWarehouse = NewWarehouse;
+    }
+
+    private async Task Delete(Warehouse warehouse)
+    {
+        DbContext.Warehouses.Remove(warehouse);
+        await DbContext.SaveChangesAsync();
+        Warehouses.Remove(warehouse);
+    }
+
+    private void CancelEditing()
+    {
+        EditingWarehouse = null;
+    }
+
+}

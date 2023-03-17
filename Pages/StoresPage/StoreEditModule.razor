@@ -1,0 +1,128 @@
+@inject StoreDBContext DbContext
+
+@if (IsOpen)
+{
+    <div class="card">
+        <div class="card-body">
+            <EditForm Model="@Model" OnValidSubmit="@SaveChanges">
+                <label>Name</label>
+                <InputText class="form-control" @bind-Value="Model.Name" />
+                <ValidationMessage For="@(() => Model.Name)" />
+                <label>Suffix</label>
+                <InputText class="form-control" @bind-Value="Model.Suffix" />
+                <label>EDRPOU</label>
+                <InputText class="form-control" @bind-Value="Model.Edrpou" />
+                <label>Actual adress</label>
+                <InputText class="form-control" @bind-Value="Model.ActualAdress" />
+                <label>Bank accountssss</label>
+                <select value="@BankAccountId" @onchange="OnBankAccountChange">
+                    @foreach (var c in Accounts)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+                <label>Cash account</label>
+                <select value="@CashAccountId" @onchange="OnCashAccountChange">
+                    @foreach (var c in Accounts)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+                <label>Registration account</label>
+                <select value="@RegistrationAccountId" @onchange="OnRegistrationAccountChange">
+                    @foreach (var c in Accounts)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+                <label>Organization</label>
+                <select value="@CurrentOrgId" @onchange="OnOrganizationChange">
+                    @foreach (var c in Organizations)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+                <label>Warehouse</label>
+                <select value="@CurrentWarhId" @onchange="OnWarehouseChange">
+                    @foreach (var c in Warehouses)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" @onclick="CancelChanges">Cancel</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Store Model { get; set; }
+    private List<Organization> Organizations { get; set; }
+    private List<Warehouse> Warehouses { get; set; }
+    private List<Account> Accounts { get; set; }
+    private string CurrentOrgId { get; set; }
+    private string CurrentWarhId { get; set; }
+    private string BankAccountId { get; set; }
+    private string CashAccountId { get; set; }
+    private string RegistrationAccountId { get; set; }
+    [Parameter]
+    public bool IsOpen { get; set; }
+    [Parameter]
+    public EventCallback<Store> OnSave { get; set; }
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Organizations = await DbContext.StructureQueries.AllOrganizationFromDB();
+        Warehouses = await DbContext.StructureQueries.AllWarehousesFromDB();
+        Accounts = await DbContext.StructureQueries.AllAccountsFromDB();
+        CurrentOrgId = Model.Organization?.Id.ToString() ?? "";
+        CurrentWarhId = Model.Warehouse?.Id.ToString() ?? "";
+        BankAccountId = Model.BankAccount?.Id.ToString() ?? "";
+        CashAccountId = Model.CashAccount?.Id.ToString() ?? "";
+        RegistrationAccountId = Model.RegistrationAccount?.Id.ToString() ?? "";
+    }
+    private async Task SaveChanges()
+    {
+        await OnSave.InvokeAsync(Model);
+    }
+
+    private void CancelChanges()
+    {
+        OnCancel.InvokeAsync();
+    }
+
+    private void OnWarehouseChange(ChangeEventArgs e)
+    {
+        int.TryParse(e.Value.ToString(), out int warehouseID);
+        Model.Warehouse = Warehouses.Find(x => x.Id == warehouseID);
+    }
+
+    private void OnOrganizationChange(ChangeEventArgs e)
+    {
+        int.TryParse(e.Value.ToString(), out int organizationID);
+        Model.Organization = Organizations.Find(x => x.Id == organizationID);
+    }
+
+    private void OnBankAccountChange(ChangeEventArgs e)
+    {
+        int.TryParse(e.Value.ToString(), out int BankAccountID);
+        Model.BankAccount = Accounts.Find(x => x.Id == BankAccountID);
+    }
+
+    private void OnCashAccountChange(ChangeEventArgs e)
+    {
+        int.TryParse(e.Value.ToString(), out int CashAccountID);
+        Model.CashAccount = Accounts.Find(x => x.Id == CashAccountID);
+    }
+
+    private void OnRegistrationAccountChange(ChangeEventArgs e)
+    {
+        int.TryParse(e.Value.ToString(), out int RegistrationAccountID);
+        Model.RegistrationAccount = Accounts.Find(x => x.Id == RegistrationAccountID);
+    }
+
+}

@@ -1,0 +1,31 @@
+
+@inject CartState Cart
+
+<tr>
+    <td>@Index</td>
+    <td>@Item.Article</td>
+    <td>@Item.Name</td>
+    <td>@Item.Cost</td>
+    <td>@MaxDiscount</td>
+    <td>
+        <button @onclick="@(() => Cart.AddItem(Item))">Add to cart</button>
+        <Button @onclick="@(()=>ShowTechItemDialog.InvokeAsync(Item))">More information</Button>
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public int Index { get; set; }
+    
+    [Parameter]
+    public TechItem Item { get; set; }
+    
+    [Parameter]
+    public EventCallback<TechItem> ShowTechItemDialog { get; set; }
+    
+    [Parameter]
+    public EventCallback<CartState> AddItem { get; set; }
+    
+    private double MaxDiscount => Math.Max(0, Math.Round(Item.Cost - Item.SelfCost, 2));
+    
+}

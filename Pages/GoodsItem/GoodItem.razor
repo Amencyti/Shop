@@ -1,0 +1,48 @@
+@page "/GoodItem/{article}"
+
+<div class="dialog-title">
+    <h2>@techItem.Name</h2>
+    Article: @techItem.Article
+    <button class="close-button" @onclick="OnCancel">X</button>
+</div>
+
+<form class="dialog-body">
+
+    <div id="left">
+        <img src="https://www.w3schools.com/images/w3schools_green.jpg">
+    </div>
+
+    <div id="right">
+        <div>
+            <label>Tech type: @techItem.Type.Name</label>
+        </div>
+
+        <div>
+            <label>Manufacturer: @techItem.Model.Manufacturer.Name</label>
+        </div>
+        <div>
+            <label>Model: @techItem.Model.Name</label>
+        </div>
+    </div>
+
+</form>
+
+<div class="dialog-buttons">
+    <button class="btn btn-secondary mr-auto" @onclick="OnCancel">Cancel</button>
+    <button class="btn btn-success ml-auto" @onclick="OnOrderClick">Order ></button>
+</div>
+
+@code {
+    [Parameter]
+    public TechItem techItem { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<TechItem> AddItem { get; set; }
+
+    private void OnOrderClick()
+    {
+        AddItem.InvokeAsync(techItem);
+        OnCancel.InvokeAsync();
+    }
+
+}
+

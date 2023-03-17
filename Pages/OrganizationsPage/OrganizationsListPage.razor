@@ -1,0 +1,84 @@
+@page "/organizations"
+@inject StoreDBContext DbContext
+
+<h1>Organizations</h1>
+<button class="btn btn-primary" @onclick="@(() => EditItem(NewOrganization))">Add</button>
+@if (EditingOrganization == NewOrganization)
+{
+    <OrganizationEditModule Model="@EditingOrganization" IsOpen="openEditor" OnSave="Save"
+    OnCancel="CancelEditing" />
+}
+<h1></h1>
+@if (Organizations == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    @foreach (var organization in Organizations)
+    {
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">@organization.Name</h5>
+                <h5 class="card-title">@organization.Edrpou</h5>
+                <Button class="btn btn-primary" @onclick="@(() => EditItem(organization))">Edit</Button>
+                <button class="btn btn-primary" @onclick="@(() => Delete(organization))">Delete</button>
+                @if (EditingOrganization == organization)
+                {
+                    <OrganizationEditModule Model="@EditingOrganization" IsOpen="openEditor" OnSave="Save"
+                        OnCancel="CancelEditing" />
+                }
+            </div>
+        </div>
+    }
+}
+@code {
+    private List<Organization> Organizations { get; set; }
+    private Organization NewOrganization { get; set; }
+    private Organization EditingOrganization;
+    private bool openEditor = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+
+        Organizations = await DbContext.StructureQueries.AllOrganizationFromDB();
+        NewOrganization = new Organization();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Save(Organization organization)
+    {
+        DbContext.Update(organization);
+        await DbContext.SaveChangesAsync();
+        EditingOrganization = null;
+        NewOrganization = new Organization();
+        Organizations = await DbContext.StructureQueries.AllOrganizationFromDB();
+    }
+
+    private void EditItem(Organization organization)
+    {
+        openEditor = false;
+        openEditor = !openEditor;
+        EditingOrganization = organization;
+    }
+
+    private void Add()
+    {
+        openEditor = false;
+        openEditor = !openEditor;
+        EditingOrganization = NewOrganization;
+    }
+
+    private async Task Delete(Organization organization)
+    {
+        DbContext.Organizations.Remove(organization);
+        await DbContext.SaveChangesAsync();
+        Organizations.Remove(organization);
+    }
+
+    private void CancelEditing()
+    {
+        EditingOrganization = null;
+    }
+
+}

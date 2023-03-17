@@ -1,0 +1,62 @@
+@inject StoreDBContext DbContext
+
+@if (IsOpen)
+{
+	<div class="card">
+		<div class="card-body">
+			<EditForm Model="@Model" OnValidSubmit="@SaveChanges">
+				<label>Pincode</label>
+				<InputNumber class="form-control" @bind-Value="@Model.PinCode" />
+				<label>Name</label>
+				<InputText class="form-control" @bind-Value="@Model.Name" />
+				<ValidationMessage For="@(() => Model.Name)" />
+				<label>Surname</label>
+				<InputText class="form-control" @bind-Value="@Model.SurName" />
+				<ValidationMessage For="@(() => Model.SurName)" />
+				<label>Date of birth</label>
+				<InputDate class="form-control" @bind-Value="@Model.DateBirth" />
+				<label>INN</label>
+				<InputNumber class="form-control" @bind-Value="@Model.Inn" />
+				<ValidationMessage For="@(() => Model.Inn)" />
+				<label>Gender</label>
+				<InputSelect class="form-control" @bind-Value="@Model.Gender">
+					@foreach (var gender in Enum.GetValues(typeof(Gender)))
+					{
+						<option value="@gender">@gender</option>
+					}
+				</InputSelect>
+				<button type="submit" class="btn btn-primary">Save</button>
+				<button type="button" class="btn btn-secondary" @onclick="CancelChanges">Cancel</button>
+				<DataAnnotationsValidator />
+			</EditForm>
+		</div>
+	</div>
+}
+
+@code {
+	[Parameter]
+	public Employee Model { get; set; }
+	private List<Organization> Organizations { get; set; }
+	private List<Employee> Employees { get; set; }
+	[Parameter]
+	public bool IsOpen { get; set; }
+	[Parameter]
+	public EventCallback<Employee> OnSave { get; set; }
+	[Parameter]
+	public EventCallback OnCancel { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		Organizations = await DbContext.StructureQueries.AllOrganizationFromDB();
+	}
+	private async Task SaveChanges()
+	{
+		await OnSave.InvokeAsync(Model);
+	}
+
+	private void CancelChanges()
+	{
+		OnCancel.InvokeAsync();
+	}
+
+}

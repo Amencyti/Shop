@@ -1,0 +1,85 @@
+@typeparam TItem
+@using System.Reflection;
+
+@if (IsOpen)
+{
+    <div class="card">
+        <div class="card-body">
+            @foreach (var property in properties)
+            {
+                <div class="form-group">
+                    <label for="@property.Name">@property.Name:</label>
+                    @if (property.PropertyType == typeof(bool))
+                    {
+                        <input type="checkbox" class="form-check-input" id="@property.Name" checked=@property.GetValue(Model)
+                            @onchange="@((ChangeEventArgs __e) => SetBoolProperty(property, __e?.Value))" />
+                    }
+                    else
+                    {
+                        <input type="text" class="form-control" id="@property.Name" value=@property.GetValue(Model)
+                            @onchange="@((ChangeEventArgs __e) => SetStringProperty(property, __e?.Value?.ToString()))" />
+                    }
+                </div>
+            }
+            <button type="submit" class="btn btn-primary" @onclick="SaveChanges">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="CancelChanges">Cancel</button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public TItem Model { get; set; }
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<TItem> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private List<PropertyInfo> properties;
+
+    public EditPage()
+    {
+    }
+
+    protected override void OnInitialized()
+    {
+        properties = Model.GetType().GetProperties().ToList();
+    }
+
+    private async Task SaveChanges()
+    {
+        await OnSave.InvokeAsync(Model);
+
+    }
+
+    private void CancelChanges()
+    {
+        OnCancel.InvokeAsync();
+    }
+
+    private string GetStringProperty(PropertyInfo property)
+    {
+        return (string)property.GetValue(Model);
+    }
+
+    private void SetStringProperty(PropertyInfo property, string value)
+    {
+        property.SetValue(Model, value);
+    }
+
+    private bool GetBoolProperty(PropertyInfo property)
+    {
+        return (bool)property.GetValue(Model);
+    }
+
+    private void SetBoolProperty(PropertyInfo property, object value)
+    {
+        property.SetValue(Model, (bool)value);
+    }
+
+}

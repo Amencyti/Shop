@@ -1,0 +1,109 @@
+
+@inject StoreDBContext DbContext
+
+@if (IsOpen)
+{
+	<div class="card">
+		<div class="card-body">
+			<EditForm Model="@Model" OnValidSubmit="@SaveChanges">
+				<label>Prefix</label>
+				<InputText class="form-control" @bind-Value="Model.Prefix" />
+				<label>Name</label>
+				<InputText class="form-control" @bind-Value="Model.Name" />
+				<ValidationMessage For="@(() => Model.Name)" />
+				<label>Full name</label>
+				<InputText class="form-control" @bind-Value="Model.FullName" />
+				<label>Legal adress</label>
+				<InputText class="form-control" @bind-Value="Model.LegalAdress" />
+				<label>Actual adress</label>
+				<InputText class="form-control" @bind-Value="Model.ActualAdress" />
+				<label>Phone</label>
+				<InputText class="form-control" @bind-Value="Model.Phone" />
+				<label>ERPOU</label>
+				<InputText class="form-control" @bind-Value="Model.Edrpou" />
+				<label>INN</label>
+				<InputText class="form-control" @bind-Value="Model.Inn" />
+				<label>Certificate number</label>
+				<input type="text" class="form-control" @bind-value="Model.CertificateNumber" />
+				<label>Till</label>
+				<select class="form-control" value="@CurrentAccountID" @onchange="OnTillChange">
+					@foreach (var c in Accounts)
+					{
+						<option value="@c.Id">@c.Name</option>
+					}
+				</select>
+				<label>CEO</label>
+				<select class="form-control" value="@CurrentCEOID" @onchange="OnCEOChange">
+					@foreach (var c in Employees)
+					{
+						<option value="@c.Id">@c.Name</option>
+					}
+				</select>
+				<label>Cashier central</label>
+				<select class="form-control" value="@CurrentCashierCentralID" @onchange="OnCashierCentralChange">
+					@foreach (var c in Employees)
+					{
+						<option value="@c.Id">@c.Name</option>
+					}
+				</select>
+				<button type="submit" class="btn btn-primary">Save</button>
+				<button type="button" class="btn btn-secondary" @onclick="CancelChanges">Cancel</button>
+				<DataAnnotationsValidator />
+			</EditForm>
+		</div>
+	</div>
+}
+
+@code {
+	[Parameter]
+	public Organization Model { get; set; }
+	private List<Account> Accounts { get; set; }
+	private List<Employee> Employees { get; set; }
+	private string CurrentAccountID { get; set; }
+	private string CurrentCEOID { get; set; }
+	private string CurrentCashierCentralID { get; set; }
+	[Parameter]
+	public bool IsOpen { get; set; }
+	[Parameter]
+	public EventCallback<Organization> OnSave { get; set; }
+	[Parameter]
+	public EventCallback OnCancel { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		Accounts = await DbContext.StructureQueries.AllAccountsFromDB();
+		Employees = await DbContext.StructureQueries.AllEmployeesFromDB();
+		CurrentAccountID = Model.MainAccount.Id.ToString() ?? "";
+		CurrentCEOID = Model.MainAccount.Id.ToString() ?? "";
+		CurrentCashierCentralID = Model.CashierCentral.Id.ToString() ?? "";
+	}
+
+	private async Task SaveChanges()
+	{
+		await OnSave.InvokeAsync(Model);
+	}
+
+	private void CancelChanges()
+	{
+		OnCancel.InvokeAsync();
+	}
+
+	private void OnTillChange(ChangeEventArgs e)
+	{
+		int.TryParse(e.Value.ToString(), out int TillID);
+		Model.MainAccount = Accounts.Find(x => x.Id == TillID);
+	}
+
+	private void OnCEOChange(ChangeEventArgs e)
+	{
+		int.TryParse(e.Value.ToString(), out int CEOId);
+		Model.Ceo = Employees.Find(x => x.Id == CEOId);
+	}
+
+	private void OnCashierCentralChange(ChangeEventArgs e)
+	{
+		int.TryParse(e.Value.ToString(), out int CashierCentralID);
+		Model.CashierCentral = Employees.Find(x => x.Id == CashierCentralID);
+	}
+
+}

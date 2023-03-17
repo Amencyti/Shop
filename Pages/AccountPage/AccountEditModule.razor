@@ -1,0 +1,48 @@
+@inject StoreDBContext DbContext
+
+@if (IsOpen)
+{
+    <div class="card">
+        <div class="card-body">
+            <EditForm Model="@Model" OnValidSubmit="@SaveChanges">
+                <label>Account name</label>
+                <InputText class="form-control" @bind-Value="Model.Name" />
+                <ValidationMessage For="@(() => Model.Name)" />
+                <label>Account number</label>
+                <InputText class="form-control" @bind-Value="Model.AccountNubmer" />
+                <ValidationMessage For="@(() => Model.AccountNubmer)" />
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" @onclick="CancelChanges">Cancel</button>
+                <DataAnnotationsValidator />
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Account Model { get; set; }
+    private List<Organization> Organizations { get; set; }
+    private List<Account> Accounts { get; set; }
+    [Parameter]
+    public bool IsOpen { get; set; }
+    [Parameter]
+    public EventCallback<Account> OnSave { get; set; }
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Organizations = await DbContext.StructureQueries.AllOrganizationFromDB();
+    }
+    private async Task SaveChanges()
+    {
+        await OnSave.InvokeAsync(Model);
+    }
+
+    private void CancelChanges()
+    {
+        OnCancel.InvokeAsync();
+    }
+
+}

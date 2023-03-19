@@ -21,7 +21,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="2"><strong>Total: @cart.GetTotalSumm()</strong></td>
+                <td colspan="2"><strong>Total: @string.Format("{0:F2}", cart.GetTotalSumm())</strong></td>
             </tr>
         </tfoot>
     </table>
@@ -31,8 +31,6 @@
 
 @code
 {
-
     [Parameter] 
     public CartState cart{ get; set; }
-
 }

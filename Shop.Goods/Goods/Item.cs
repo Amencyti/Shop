@@ -13,9 +13,9 @@ namespace Shop.Goods
         public string ShortDescription { get; set; }
         public string Description { get; set; }
         public bool Available { get; set; }
-        public double Cost { get; set; }
+        public decimal Cost { get; set; }
         public ItemType ItemType { get; set; }
-        public double SelfCost { get; set; }
+        public decimal SelfCost { get; set; }
         public int Count { get; set; }
         public Store Store { get; set; }
         public Warehouse Warehouse { get; set; }

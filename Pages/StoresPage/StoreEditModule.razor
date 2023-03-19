@@ -85,15 +85,10 @@
         CashAccountId = Model.CashAccount?.Id.ToString() ?? "";
         RegistrationAccountId = Model.RegistrationAccount?.Id.ToString() ?? "";
     }
-    private async Task SaveChanges()
-    {
-        await OnSave.InvokeAsync(Model);
-    }
 
-    private void CancelChanges()
-    {
-        OnCancel.InvokeAsync();
-    }
+    private async Task SaveChanges() => await OnSave.InvokeAsync(Model);
+    
+    private void CancelChanges() => OnCancel.InvokeAsync();
 
     private void OnWarehouseChange(ChangeEventArgs e)
     {

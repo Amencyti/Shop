@@ -34,7 +34,7 @@ namespace Shop.DataBase
             RecordsAddQueries = new RecordsAddQueries();
             RecordsAddQueries.SetDBContext(this);
             //var folder = Environment.SpecialFolder.;
-            var path = "C:/Users/38093/source/repos/Shop/Shop/DB";
+            var path = "E:/VisualStudioProjects/Shop/DB/";
             DbPath = System.IO.Path.Join(path, "Shop.db");
             //Database.EnsureDeleted();
             //Database.EnsureCreated();

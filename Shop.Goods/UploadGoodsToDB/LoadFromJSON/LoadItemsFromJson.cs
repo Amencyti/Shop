@@ -37,8 +37,8 @@ public class LoadItemsFromJson
                 TechItem techItem = new TechItem();
                 techItem.Article = item.art;
                 techItem.Available = true;
-                techItem.SelfCost = GetDouble(item.income);
-                techItem.Cost = GetDouble(item.price);
+                techItem.SelfCost = Convert.ToDecimal(GetDouble(item.income));
+                techItem.Cost = Convert.ToDecimal(GetDouble(item.price));
                 techItem.ItemType = ItemType.Tech;
                 techItem.Name = item.name;
                 techItem.Uid = item.itemUID;

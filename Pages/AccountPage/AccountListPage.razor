@@ -6,7 +6,7 @@
 @if (EditingAccount == NewAccount)
 {
     <AccountEditModule Model="@EditingAccount" IsOpen="openEditor" OnSave="Save"
-    OnCancel="CancelEditing" />
+    OnCancel="(() => EditingAccount = null)" />
 }
 <h1></h1>
 @if (Accounts == null)
@@ -25,7 +25,7 @@ else
                 @if (EditingAccount == Account)
                 {
                     <AccountEditModule Model="@EditingAccount" IsOpen="openEditor" OnSave="Save"
-                        OnCancel="CancelEditing" />
+                        OnCancel="(() => EditingAccount = null)" />
                 }
             </div>
         </div>
@@ -74,11 +74,6 @@ else
         DbContext.Accounts.Remove(account);
         await DbContext.SaveChangesAsync();
         Accounts.Remove(account);
-    }
-
-    private void CancelEditing()
-    {
-        EditingAccount = null;
     }
 
 }

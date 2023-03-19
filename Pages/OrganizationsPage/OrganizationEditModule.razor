@@ -25,7 +25,7 @@
 				<InputText class="form-control" @bind-Value="Model.Inn" />
 				<label>Certificate number</label>
 				<input type="text" class="form-control" @bind-value="Model.CertificateNumber" />
-				<label>Till</label>
+				<label>Account</label>
 				<select class="form-control" value="@CurrentAccountID" @onchange="OnTillChange">
 					@foreach (var c in Accounts)
 					{
@@ -73,20 +73,14 @@
 	{
 		Accounts = await DbContext.StructureQueries.AllAccountsFromDB();
 		Employees = await DbContext.StructureQueries.AllEmployeesFromDB();
-		CurrentAccountID = Model.MainAccount.Id.ToString() ?? "";
-		CurrentCEOID = Model.MainAccount.Id.ToString() ?? "";
-		CurrentCashierCentralID = Model.CashierCentral.Id.ToString() ?? "";
+		CurrentAccountID = Model.MainAccount?.Id.ToString() ?? "";
+		CurrentCEOID = Model.Ceo?.Id.ToString() ?? "";
+		CurrentCashierCentralID = Model.CashierCentral?.Id.ToString() ?? "";
 	}
 
-	private async Task SaveChanges()
-	{
-		await OnSave.InvokeAsync(Model);
-	}
+	private async Task SaveChanges() =>	await OnSave.InvokeAsync(Model);
 
-	private void CancelChanges()
-	{
-		OnCancel.InvokeAsync();
-	}
+	private void CancelChanges() =>	OnCancel.InvokeAsync();
 
 	private void OnTillChange(ChangeEventArgs e)
 	{

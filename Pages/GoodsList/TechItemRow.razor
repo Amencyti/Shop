@@ -6,7 +6,7 @@
     <td>@Item.Article</td>
     <td>@Item.Name</td>
     <td>@Item.Cost</td>
-    <td>@MaxDiscount</td>
+    <td>@string.Format("{0:F2}", MaxDiscount)</td>
     <td>
         <button @onclick="@(() => Cart.AddItem(Item))">Add to cart</button>
         <Button @onclick="@(()=>ShowTechItemDialog.InvokeAsync(Item))">More information</Button>
@@ -26,6 +26,6 @@
     [Parameter]
     public EventCallback<CartState> AddItem { get; set; }
     
-    private double MaxDiscount => Math.Max(0, Math.Round(Item.Cost - Item.SelfCost, 2));
+    private decimal MaxDiscount => Math.Max(0, Math.Round(Item.Cost - Item.SelfCost, 2));
     
 }
